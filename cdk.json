@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/aws-cdk-cloudfront-websockets-vpc-origins.ts",
+  "app": "npx tsx bin/aws-cdk-cloudfront-websockets-vpc-origins.ts",
   "watch": {
     "include": [
       "**"

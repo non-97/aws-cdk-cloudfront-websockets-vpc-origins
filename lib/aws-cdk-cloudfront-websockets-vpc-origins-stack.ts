@@ -1,16 +1,27 @@
-import * as cdk from 'aws-cdk-lib/core';
-import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
+import { VpcConstruct } from "./construct/vpc-construct";
+import { AlbConstruct } from "./construct/alb-construct";
+import { EcsConstruct } from "./construct/ecs-construct";
+import { CloudfrontConstruct } from "./construct/cloudfront-construct";
 
 export class AwsCdkCloudfrontWebsocketsVpcOriginsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const vpcConstruct = new VpcConstruct(this, "Vpc");
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'AwsCdkCloudfrontWebsocketsVpcOriginsQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const albConstruct = new AlbConstruct(this, "Alb", {
+      vpc: vpcConstruct.vpc,
+    });
+
+    new EcsConstruct(this, "Ecs", {
+      vpc: vpcConstruct.vpc,
+      targetGroup: albConstruct.targetGroup,
+    });
+
+    new CloudfrontConstruct(this, "Cloudfront", {
+      alb: albConstruct.alb,
+    });
   }
 }

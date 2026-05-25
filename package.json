@@ -2,18 +2,16 @@
   "name": "aws-cdk-cloudfront-websockets-vpc-origins",
   "version": "0.1.0",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
   },
   "devDependencies": {
     "@types/jest": "^30",
     "@types/node": "^24.10.1",
+    "aws-cdk": "2.1122.0",
     "jest": "^30",
     "ts-jest": "^29",
-    "aws-cdk": "2.1122.0",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
     "typescript": "~5.9.3"
   },
   "dependencies": {

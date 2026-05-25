@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CloudFront WebSockets VPC Origins Demo</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #fafafa;
+        --fg: #222;
+        --muted: #888;
+        --border: #ddd;
+        --welcome: #2b8a3e;
+        --echo: #555;
+        --broadcast: #1c7ed6;
+        --error: #c92a2a;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1a1a1a;
+          --fg: #eee;
+          --muted: #999;
+          --border: #333;
+          --welcome: #51cf66;
+          --echo: #aaa;
+          --broadcast: #74c0fc;
+          --error: #ff6b6b;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        max-width: 760px;
+        margin: 2em auto;
+        padding: 0 1em;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      h1 {
+        font-size: 1.4em;
+        margin-bottom: 0.3em;
+      }
+      .subtitle {
+        color: var(--muted);
+        font-size: 0.9em;
+        margin-bottom: 1.5em;
+      }
+      #status {
+        padding: 0.4em 0.8em;
+        border-radius: 4px;
+        background: var(--border);
+        display: inline-block;
+        font-size: 0.85em;
+        margin-bottom: 1em;
+      }
+      #status.open {
+        background: var(--welcome);
+        color: white;
+      }
+      #status.error,
+      #status.closed {
+        background: var(--error);
+        color: white;
+      }
+      #log {
+        border: 1px solid var(--border);
+        height: 420px;
+        overflow-y: auto;
+        padding: 1em;
+        font-size: 0.9em;
+        line-height: 1.5;
+        border-radius: 4px;
+      }
+      .row {
+        margin-bottom: 0.4em;
+        word-break: break-word;
+      }
+      .welcome {
+        color: var(--welcome);
+        font-weight: 600;
+      }
+      .echo {
+        color: var(--echo);
+      }
+      .broadcast {
+        color: var(--broadcast);
+      }
+      .system {
+        color: var(--muted);
+        font-style: italic;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.8em;
+        margin-left: 0.3em;
+      }
+      .input-row {
+        margin-top: 1em;
+        display: flex;
+        gap: 0.5em;
+      }
+      input[type="text"] {
+        flex: 1;
+        padding: 0.6em;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--bg);
+        color: var(--fg);
+        font-size: 1em;
+      }
+      input[type="text"]:focus {
+        outline: none;
+        border-color: var(--broadcast);
+      }
+      button {
+        padding: 0.6em 1.2em;
+        border: none;
+        border-radius: 4px;
+        background: var(--broadcast);
+        color: white;
+        font-size: 1em;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      code {
+        background: var(--border);
+        padding: 0.1em 0.4em;
+        border-radius: 3px;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>CloudFront WebSockets VPC Origins Demo</h1>
+    <p class="subtitle">
+      WebSocket endpoint: <code id="endpoint"></code>
+    </p>
+    <div id="status">connecting...</div>
+    <div id="log"></div>
+    <div class="input-row">
+      <input id="msg" type="text" placeholder="メッセージを入力 (Enter で送信)" autocomplete="off" />
+      <button id="send" type="button" disabled>送信</button>
+    </div>
+
+    <script>
+      const WS_PATH = "/websocket";
+      const wsUrl = `wss://${location.host}${WS_PATH}`;
+      document.getElementById("endpoint").textContent = wsUrl;
+
+      const logEl = document.getElementById("log");
+      const statusEl = document.getElementById("status");
+      const inputEl = document.getElementById("msg");
+      const sendBtn = document.getElementById("send");
+
+      const setStatus = (text, cls) => {
+        statusEl.textContent = text;
+        statusEl.className = cls;
+      };
+
+      const append = (cls, content) => {
+        const div = document.createElement("div");
+        div.className = `row ${cls}`;
+        div.innerHTML = content;
+        logEl.appendChild(div);
+        logEl.scrollTop = logEl.scrollHeight;
+      };
+
+      const fmtTime = () => {
+        const d = new Date();
+        return `${d.getHours().toString().padStart(2, "0")}:${d
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
+      };
+
+      const escape = (s) =>
+        String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+
+      const ws = new WebSocket(wsUrl);
+
+      ws.addEventListener("open", () => {
+        setStatus("✓ connected", "open");
+        sendBtn.disabled = false;
+        append("system", `[${fmtTime()}] 接続しました`);
+      });
+
+      ws.addEventListener("close", (e) => {
+        setStatus(`✕ closed (code ${e.code})`, "closed");
+        sendBtn.disabled = true;
+        append(
+          "system",
+          `[${fmtTime()}] 切断: code=${e.code} reason=${escape(e.reason || "(none)")}`
+        );
+      });
+
+      ws.addEventListener("error", () => {
+        setStatus("error", "error");
+        append("system", `[${fmtTime()}] エラーが発生しました`);
+      });
+
+      ws.addEventListener("message", (e) => {
+        let m;
+        try {
+          m = JSON.parse(e.data);
+        } catch {
+          append("system", `[${fmtTime()}] non-JSON: ${escape(e.data)}`);
+          return;
+        }
+        const time = fmtTime();
+        const shortId = (id) => `<code>${escape(id?.slice(0, 8) ?? "")}</code>`;
+        if (m.type === "welcome") {
+          append(
+            "welcome",
+            `[${time}] welcome — あなたは ${shortId(m.id)} です <span class="meta">(現在 ${m.clientCount} 人接続中)</span>`
+          );
+        } else if (m.type === "echo") {
+          append(
+            "echo",
+            `[${time}] <strong>自分:</strong> ${escape(m.message)}`
+          );
+        } else if (m.type === "broadcast") {
+          append(
+            "broadcast",
+            `[${time}] ${shortId(m.from)}: ${escape(m.message)}`
+          );
+        } else {
+          append("system", `[${time}] ${escape(JSON.stringify(m))}`);
+        }
+      });
+
+      const send = () => {
+        const text = inputEl.value;
+        if (!text || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(text);
+        inputEl.value = "";
+      };
+      sendBtn.addEventListener("click", send);
+      inputEl.addEventListener("keydown", (e) => {
+        // IME の確定 Enter (isComposing === true) を除外し、送信用の Enter のみを拾う
+        if (e.key === "Enter" && !e.isComposing) send();
+      });
+    </script>
+  </body>
+</html>

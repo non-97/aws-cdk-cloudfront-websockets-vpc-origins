@@ -1,0 +1,1067 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`snapshot 1`] = `
+{
+  "Outputs": {
+    "CloudfrontDistributionDomainNameF9D69FEF": {
+      "Description": "CloudFront distribution domain (use wss:// scheme for WebSocket)",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "Cloudfront16B1DCDE",
+                "DomainName",
+              ],
+            },
+          ],
+        ],
+      },
+    },
+    "CloudfrontWebSocketEndpoint6F216A5E": {
+      "Description": "WebSocket endpoint for client connections",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "wss://",
+            {
+              "Fn::GetAtt": [
+                "Cloudfront16B1DCDE",
+                "DomainName",
+              ],
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "Alb16C2F182": {
+      "Properties": {
+        "LoadBalancerAttributes": [
+          {
+            "Key": "deletion_protection.enabled",
+            "Value": "false",
+          },
+          {
+            "Key": "idle_timeout.timeout_seconds",
+            "Value": "70",
+          },
+        ],
+        "Scheme": "internal",
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "AlbSecurityGroup580F65A6",
+              "GroupId",
+            ],
+          },
+        ],
+        "Subnets": [
+          {
+            "Ref": "VpcIsolatedSubnet1SubnetE48C5737",
+          },
+          {
+            "Ref": "VpcIsolatedSubnet2Subnet16364B91",
+          },
+        ],
+        "Type": "application",
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+    },
+    "AlbListener86261768": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "AlbTargetGroup3E290A92",
+            },
+            "Type": "forward",
+          },
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Alb16C2F182",
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+    },
+    "AlbSecurityGroup580F65A6": {
+      "Properties": {
+        "GroupDescription": "Automatically created Security Group for ELB TestStackAlb4064853B",
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow from anyone on port 80",
+            "FromPort": 80,
+            "IpProtocol": "tcp",
+            "ToPort": 80,
+          },
+        ],
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "AlbSecurityGrouptoTestStackEcsServiceSecurityGroupBC774F4480800DAF4EE8": {
+      "Properties": {
+        "Description": "Load balancer to target",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "EcsServiceSecurityGroup548BB3AA",
+            "GroupId",
+          ],
+        },
+        "FromPort": 8080,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "AlbSecurityGroup580F65A6",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 8080,
+      },
+      "Type": "AWS::EC2::SecurityGroupEgress",
+    },
+    "AlbTargetGroup3E290A92": {
+      "Properties": {
+        "HealthCheckIntervalSeconds": 15,
+        "HealthCheckPath": "/health",
+        "HealthCheckPort": "8080",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 5,
+        "HealthyThresholdCount": 2,
+        "Matcher": {
+          "HttpCode": "200",
+        },
+        "Port": 8080,
+        "Protocol": "HTTP",
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "30",
+          },
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false",
+          },
+        ],
+        "TargetType": "ip",
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+    },
+    "Cloudfront16B1DCDE": {
+      "Properties": {
+        "DistributionConfig": {
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE",
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+            "ResponseHeadersPolicyId": "67f7725c-6f97-4210-82d7-5512b31e9d03",
+            "TargetOriginId": "TestStackCloudfrontOrigin1523932F6",
+            "ViewerProtocolPolicy": "redirect-to-https",
+          },
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "Alb16C2F182",
+                  "DNSName",
+                ],
+              },
+              "Id": "TestStackCloudfrontOrigin1523932F6",
+              "VpcOriginConfig": {
+                "OriginKeepaliveTimeout": 60,
+                "OriginReadTimeout": 60,
+                "VpcOriginId": {
+                  "Fn::GetAtt": [
+                    "CloudfrontOrigin1VpcOriginF160E91D",
+                    "Id",
+                  ],
+                },
+              },
+            },
+          ],
+          "PriceClass": "PriceClass_100",
+        },
+      },
+      "Type": "AWS::CloudFront::Distribution",
+    },
+    "CloudfrontOrigin1VpcOriginF160E91D": {
+      "Properties": {
+        "VpcOriginEndpointConfig": {
+          "Arn": {
+            "Ref": "Alb16C2F182",
+          },
+          "HTTPPort": 80,
+          "Name": "TestStackCloudfrontOrigin1VpcOrigin8AAF4EDD",
+          "OriginProtocolPolicy": "http-only",
+          "OriginSSLProtocols": [
+            "TLSv1.2",
+          ],
+        },
+      },
+      "Type": "AWS::CloudFront::VpcOrigin",
+    },
+    "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E": {
+      "DependsOn": [
+        "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-123456789012-us-east-1",
+          "S3Key": "7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200.zip",
+        },
+        "Description": "Lambda function for removing all inbound/outbound rules from the VPC default security group",
+        "Handler": "__entrypoint__.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:\${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          },
+        ],
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "ec2:AuthorizeSecurityGroupIngress",
+                    "ec2:AuthorizeSecurityGroupEgress",
+                    "ec2:RevokeSecurityGroupIngress",
+                    "ec2:RevokeSecurityGroupEgress",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:ec2:us-east-1:123456789012:security-group/",
+                          {
+                            "Fn::GetAtt": [
+                              "Vpc8378EB38",
+                              "DefaultSecurityGroup",
+                            ],
+                          },
+                        ],
+                      ],
+                    },
+                  ],
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "Inline",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EcsClusterEAC0C105": {
+      "Properties": {
+        "ClusterSettings": [
+          {
+            "Name": "containerInsights",
+            "Value": "enhanced",
+          },
+        ],
+      },
+      "Type": "AWS::ECS::Cluster",
+    },
+    "EcsLogGroupAD27A916": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionInDays": 7,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "EcsService5196398A": {
+      "DependsOn": [
+        "AlbListener86261768",
+        "EcsTaskDefinitionTaskRoleDefaultPolicy5EC10DF8",
+        "EcsTaskDefinitionTaskRole9E0C1BC3",
+      ],
+      "Properties": {
+        "Cluster": {
+          "Ref": "EcsClusterEAC0C105",
+        },
+        "DeploymentConfiguration": {
+          "DeploymentCircuitBreaker": {
+            "Enable": true,
+            "Rollback": true,
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 0,
+        },
+        "DesiredCount": 1,
+        "EnableECSManagedTags": false,
+        "EnableExecuteCommand": true,
+        "HealthCheckGracePeriodSeconds": 30,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "app",
+            "ContainerPort": 8080,
+            "TargetGroupArn": {
+              "Ref": "AlbTargetGroup3E290A92",
+            },
+          },
+        ],
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": [
+                  "EcsServiceSecurityGroup548BB3AA",
+                  "GroupId",
+                ],
+              },
+            ],
+            "Subnets": [
+              {
+                "Ref": "VpcIsolatedSubnet1SubnetE48C5737",
+              },
+              {
+                "Ref": "VpcIsolatedSubnet2Subnet16364B91",
+              },
+            ],
+          },
+        },
+        "TaskDefinition": {
+          "Ref": "EcsTaskDefinition02F34504",
+        },
+      },
+      "Type": "AWS::ECS::Service",
+    },
+    "EcsServiceSecurityGroup548BB3AA": {
+      "DependsOn": [
+        "EcsTaskDefinitionTaskRoleDefaultPolicy5EC10DF8",
+        "EcsTaskDefinitionTaskRole9E0C1BC3",
+      ],
+      "Properties": {
+        "GroupDescription": "TestStack/Ecs/Service/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "EcsServiceSecurityGroupfromTestStackAlbSecurityGroupB290A98E8080DD3A7214": {
+      "DependsOn": [
+        "EcsTaskDefinitionTaskRoleDefaultPolicy5EC10DF8",
+        "EcsTaskDefinitionTaskRole9E0C1BC3",
+      ],
+      "Properties": {
+        "Description": "Load balancer to target",
+        "FromPort": 8080,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "EcsServiceSecurityGroup548BB3AA",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "AlbSecurityGroup580F65A6",
+            "GroupId",
+          ],
+        },
+        "ToPort": 8080,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
+    },
+    "EcsTaskDefinition02F34504": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "PORT",
+                "Value": "8080",
+              },
+            ],
+            "Essential": true,
+            "HealthCheck": {
+              "Command": [
+                "CMD-SHELL",
+                "wget -q -O - http://localhost:8080/health || exit 1",
+              ],
+              "Interval": 15,
+              "Retries": 3,
+              "StartPeriod": 10,
+              "Timeout": 5,
+            },
+            "Image": {
+              "Fn::Sub": "123456789012.dkr.ecr.us-east-1.\${AWS::URLSuffix}/cdk-hnb659fds-container-assets-123456789012-us-east-1:63131fe96c5d46edfe7272171ade47ccb71790b5f18e842c020baf38b3fa3d33",
+            },
+            "LinuxParameters": {
+              "Capabilities": {},
+              "InitProcessEnabled": true,
+            },
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "EcsLogGroupAD27A916",
+                },
+                "awslogs-region": "us-east-1",
+                "awslogs-stream-prefix": "app",
+              },
+            },
+            "Name": "app",
+            "PortMappings": [
+              {
+                "ContainerPort": 8080,
+                "Protocol": "tcp",
+              },
+            ],
+          },
+        ],
+        "Cpu": "256",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "EcsTaskDefinitionExecutionRole6C4B4851",
+            "Arn",
+          ],
+        },
+        "Family": "TestStackEcsTaskDefinition827505CA",
+        "Memory": "512",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE",
+        ],
+        "RuntimePlatform": {
+          "CpuArchitecture": "ARM64",
+          "OperatingSystemFamily": "LINUX",
+        },
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "EcsTaskDefinitionTaskRole9E0C1BC3",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ECS::TaskDefinition",
+    },
+    "EcsTaskDefinitionExecutionRole6C4B4851": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EcsTaskDefinitionExecutionRoleDefaultPolicyBF2B1E6E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:ecr:us-east-1:123456789012:repository/cdk-hnb659fds-container-assets-123456789012-us-east-1",
+            },
+            {
+              "Action": "ecr:GetAuthorizationToken",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "EcsLogGroupAD27A916",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EcsTaskDefinitionExecutionRoleDefaultPolicyBF2B1E6E",
+        "Roles": [
+          {
+            "Ref": "EcsTaskDefinitionExecutionRole6C4B4851",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "EcsTaskDefinitionTaskRole9E0C1BC3": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EcsTaskDefinitionTaskRoleDefaultPolicy5EC10DF8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EcsTaskDefinitionTaskRoleDefaultPolicy5EC10DF8",
+        "Roles": [
+          {
+            "Ref": "EcsTaskDefinitionTaskRole9E0C1BC3",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "Vpc8378EB38": {
+      "Properties": {
+        "CidrBlock": "10.10.8.0/22",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::VPC",
+    },
+    "VpcCloudWatchLogsEndpointA6195533": {
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "VpcCloudWatchLogsEndpointSecurityGroupE044298A",
+              "GroupId",
+            ],
+          },
+        ],
+        "ServiceName": "com.amazonaws.us-east-1.logs",
+        "SubnetIds": [
+          {
+            "Ref": "VpcIsolatedSubnet1SubnetE48C5737",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default",
+          },
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::VPCEndpoint",
+    },
+    "VpcCloudWatchLogsEndpointSecurityGroupE044298A": {
+      "Properties": {
+        "GroupDescription": "TestStack/Vpc/Default/CloudWatchLogsEndpoint/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "Vpc8378EB38",
+                "CidrBlock",
+              ],
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "Vpc8378EB38",
+                      "CidrBlock",
+                    ],
+                  },
+                  ":443",
+                ],
+              ],
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default",
+          },
+        ],
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "VpcEcrApiEndpoint25D60339": {
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "VpcEcrApiEndpointSecurityGroupA45F6D9E",
+              "GroupId",
+            ],
+          },
+        ],
+        "ServiceName": "com.amazonaws.us-east-1.ecr.api",
+        "SubnetIds": [
+          {
+            "Ref": "VpcIsolatedSubnet1SubnetE48C5737",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default",
+          },
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::VPCEndpoint",
+    },
+    "VpcEcrApiEndpointSecurityGroupA45F6D9E": {
+      "Properties": {
+        "GroupDescription": "TestStack/Vpc/Default/EcrApiEndpoint/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "Vpc8378EB38",
+                "CidrBlock",
+              ],
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "Vpc8378EB38",
+                      "CidrBlock",
+                    ],
+                  },
+                  ":443",
+                ],
+              ],
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default",
+          },
+        ],
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "VpcEcrDockerEndpoint53ED547B": {
+      "Properties": {
+        "PrivateDnsEnabled": true,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "VpcEcrDockerEndpointSecurityGroup5D41A216",
+              "GroupId",
+            ],
+          },
+        ],
+        "ServiceName": "com.amazonaws.us-east-1.ecr.dkr",
+        "SubnetIds": [
+          {
+            "Ref": "VpcIsolatedSubnet1SubnetE48C5737",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default",
+          },
+        ],
+        "VpcEndpointType": "Interface",
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::VPCEndpoint",
+    },
+    "VpcEcrDockerEndpointSecurityGroup5D41A216": {
+      "Properties": {
+        "GroupDescription": "TestStack/Vpc/Default/EcrDockerEndpoint/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "Vpc8378EB38",
+                "CidrBlock",
+              ],
+            },
+            "Description": {
+              "Fn::Join": [
+                "",
+                [
+                  "from ",
+                  {
+                    "Fn::GetAtt": [
+                      "Vpc8378EB38",
+                      "CidrBlock",
+                    ],
+                  },
+                  ":443",
+                ],
+              ],
+            },
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default",
+          },
+        ],
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "VpcInternetGatewayAFE6D548": {
+      "Type": "AWS::EC2::InternetGateway",
+    },
+    "VpcInternetGatewayAttachment0367750F": {
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "VpcInternetGatewayAFE6D548",
+        },
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+    },
+    "VpcIsolatedSubnet1RouteTable4771E3E5": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default/IsolatedSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "VpcIsolatedSubnet1RouteTableAssociationD300FCBB": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "VpcIsolatedSubnet1RouteTable4771E3E5",
+        },
+        "SubnetId": {
+          "Ref": "VpcIsolatedSubnet1SubnetE48C5737",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "VpcIsolatedSubnet1SubnetE48C5737": {
+      "Properties": {
+        "AvailabilityZone": "dummy1a",
+        "CidrBlock": "10.10.8.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default/IsolatedSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "VpcIsolatedSubnet2RouteTable1D30AF7D": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default/IsolatedSubnet2",
+          },
+        ],
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "VpcIsolatedSubnet2RouteTableAssociationF7B18CCA": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "VpcIsolatedSubnet2RouteTable1D30AF7D",
+        },
+        "SubnetId": {
+          "Ref": "VpcIsolatedSubnet2Subnet16364B91",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "VpcIsolatedSubnet2Subnet16364B91": {
+      "Properties": {
+        "AvailabilityZone": "dummy1b",
+        "CidrBlock": "10.10.9.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default/IsolatedSubnet2",
+          },
+        ],
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "VpcRestrictDefaultSecurityGroupCustomResourceC73DA2BE": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "Account": "123456789012",
+        "DefaultSecurityGroupId": {
+          "Fn::GetAtt": [
+            "Vpc8378EB38",
+            "DefaultSecurityGroup",
+          ],
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::VpcRestrictDefaultSG",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "VpcS3A5408339": {
+      "Properties": {
+        "RouteTableIds": [
+          {
+            "Ref": "VpcIsolatedSubnet1RouteTable4771E3E5",
+          },
+          {
+            "Ref": "VpcIsolatedSubnet2RouteTable1D30AF7D",
+          },
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".s3",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Vpc/Default",
+          },
+        ],
+        "VpcEndpointType": "Gateway",
+        "VpcId": {
+          "Ref": "Vpc8378EB38",
+        },
+      },
+      "Type": "AWS::EC2::VPCEndpoint",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
